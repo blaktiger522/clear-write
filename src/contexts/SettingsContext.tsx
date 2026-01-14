@@ -1,0 +1,67 @@
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+
+export interface Settings {
+  language: string;
+  autoSaveHistory: boolean;
+  compactView: boolean;
+}
+
+interface SettingsContextType {
+  settings: Settings;
+  updateSettings: (updates: Partial<Settings>) => void;
+  resetSettings: () => void;
+}
+
+const defaultSettings: Settings = {
+  language: "eng",
+  autoSaveHistory: true,
+  compactView: false,
+};
+
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+
+const STORAGE_KEY = "scribescan_settings";
+
+export const SettingsProvider = ({ children }: { children: ReactNode }) => {
+  const [settings, setSettings] = useState<Settings>(defaultSettings);
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setSettings({ ...defaultSettings, ...parsed });
+      } catch {
+        console.error("Failed to parse settings");
+      }
+    }
+  }, []);
+
+  // Save settings to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  }, [settings]);
+
+  const updateSettings = (updates: Partial<Settings>) => {
+    setSettings((prev) => ({ ...prev, ...updates }));
+  };
+
+  const resetSettings = () => {
+    setSettings(defaultSettings);
+  };
+
+  return (
+    <SettingsContext.Provider value={{ settings, updateSettings, resetSettings }}>
+      {children}
+    </SettingsContext.Provider>
+  );
+};
+
+export const useSettings = () => {
+  const context = useContext(SettingsContext);
+  if (!context) {
+    throw new Error("useSettings must be used within a SettingsProvider");
+  }
+  return context;
+};

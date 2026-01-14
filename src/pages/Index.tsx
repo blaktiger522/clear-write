@@ -7,6 +7,8 @@ import UploadArea from "@/components/UploadArea";
 import ProcessingState from "@/components/ProcessingState";
 import ComparisonView from "@/components/ComparisonView";
 import { useOCR } from "@/hooks/useOCR";
+import { useHistory } from "@/contexts/HistoryContext";
+import { useSettings } from "@/contexts/SettingsContext";
 import { toast } from "sonner";
 
 type AppState = "upload" | "processing" | "result";
@@ -15,18 +17,31 @@ const Index = () => {
   const [appState, setAppState] = useState<AppState>("upload");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [processedText, setProcessedText] = useState<string>("");
+  const [confidence, setConfidence] = useState<number>(0);
   
   const { isProcessing, progress, status, processImage, reset: resetOCR } = useOCR();
+  const { addToHistory } = useHistory();
+  const { settings } = useSettings();
 
   const handleImageUpload = useCallback(async (file: File, preview: string) => {
     setUploadedImage(preview);
     setAppState("processing");
 
-    const result = await processImage(file);
+    const result = await processImage(file, settings.language);
     
     if (result) {
       setProcessedText(result.text);
+      setConfidence(result.confidence);
       setAppState("result");
+      
+      // Auto-save to history if enabled
+      if (settings.autoSaveHistory) {
+        addToHistory({
+          originalImage: preview,
+          processedText: result.text,
+          confidence: result.confidence,
+        });
+      }
       
       if (result.text) {
         toast.success("Text recognized successfully!", {
@@ -43,12 +58,13 @@ const Index = () => {
       });
       handleReset();
     }
-  }, [processImage]);
+  }, [processImage, settings.language, settings.autoSaveHistory, addToHistory]);
 
   const handleReset = useCallback(() => {
     setAppState("upload");
     setUploadedImage(null);
     setProcessedText("");
+    setConfidence(0);
     resetOCR();
   }, [resetOCR]);
 
