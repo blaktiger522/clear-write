@@ -23,7 +23,7 @@ export const useOCR = () => {
     error: null,
   });
 
-  const processImage = useCallback(async (imageSource: string | File): Promise<OCRResult | null> => {
+  const processImage = useCallback(async (imageSource: string | File, language: string = "eng"): Promise<OCRResult | null> => {
     setState({
       isProcessing: true,
       progress: 0,
@@ -33,7 +33,7 @@ export const useOCR = () => {
     });
 
     try {
-      const result = await Tesseract.recognize(imageSource, "eng", {
+      const result = await Tesseract.recognize(imageSource, language, {
         logger: (m) => {
           if (m.status === "recognizing text") {
             setState((prev) => ({
