@@ -1,14 +1,9 @@
 import { motion } from "framer-motion";
-import { Settings, Globe, HardDrive, Save, Info } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { useSettings } from "@/contexts/SettingsContext";
+import { Settings, Globe, HardDrive, Info } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const SettingsPage = () => {
-  const { settings, updateSettings } = useSettings();
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -79,42 +74,11 @@ const SettingsPage = () => {
             </div>
           </motion.div>
 
-          {/* Auto-save History */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-card rounded-2xl shadow-soft p-6"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
-                <Save className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="font-display font-semibold">Auto-save History</h2>
-                <p className="text-sm text-muted-foreground">
-                  Automatically save processed documents to history
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label htmlFor="auto-save" className="text-sm">
-                Save to history after processing
-              </Label>
-              <Switch
-                id="auto-save"
-                checked={settings.autoSaveHistory}
-                onCheckedChange={(checked) => updateSettings({ autoSaveHistory: checked })}
-              />
-            </div>
-          </motion.div>
-
           {/* About */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.2 }}
             className="bg-accent/50 rounded-2xl p-6"
           >
             <div className="flex items-start gap-3">
