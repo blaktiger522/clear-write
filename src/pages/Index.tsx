@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import UploadArea from "@/components/UploadArea";
+import HowItWorks from "@/components/HowItWorks";
 import ProcessingState from "@/components/ProcessingState";
 import ComparisonView from "@/components/ComparisonView";
 import { useOCR } from "@/hooks/useOCR";
@@ -82,12 +83,13 @@ const Index = () => {
               exit={{ opacity: 0 }}
             >
               <HeroSection />
-              <section className="container mx-auto px-4 pb-16">
+              <section className="container mx-auto px-4 pb-8">
                 <UploadArea
                   onImageUpload={handleImageUpload}
                   isProcessing={isProcessing}
                 />
               </section>
+              <HowItWorks />
             </motion.div>
           )}
 
