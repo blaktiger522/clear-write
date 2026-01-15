@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Download, Share2, Copy, Check, RefreshCw, Image, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { jsPDF } from "jspdf";
 
 interface ComparisonViewProps {
   originalImage: string;
@@ -12,6 +13,7 @@ interface ComparisonViewProps {
 
 const ComparisonView = ({ originalImage, processedText, onReset }: ComparisonViewProps) => {
   const [copied, setCopied] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -24,15 +26,89 @@ const ComparisonView = ({ originalImage, processedText, onReset }: ComparisonVie
     }
   };
 
-  const handleDownload = () => {
-    const blob = new Blob([processedText], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "recognized-text.txt";
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Text file downloaded!");
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    
+    try {
+      const pdf = new jsPDF();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
+      const contentWidth = pageWidth - margin * 2;
+
+      // Add title
+      pdf.setFontSize(18);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("ScribeScan - Recognized Document", margin, margin);
+
+      // Add original image
+      const img = new window.Image();
+      img.crossOrigin = "anonymous";
+      
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = originalImage;
+      });
+
+      // Calculate image dimensions to fit width while maintaining aspect ratio
+      const imgAspectRatio = img.width / img.height;
+      let imgWidth = contentWidth;
+      let imgHeight = imgWidth / imgAspectRatio;
+      
+      // Limit image height to leave room for text
+      const maxImgHeight = (pageHeight - margin * 2) * 0.4;
+      if (imgHeight > maxImgHeight) {
+        imgHeight = maxImgHeight;
+        imgWidth = imgHeight * imgAspectRatio;
+      }
+
+      // Center the image
+      const imgX = margin + (contentWidth - imgWidth) / 2;
+      let currentY = margin + 15;
+
+      // Add "Original Image" label
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Original Image:", margin, currentY);
+      currentY += 5;
+
+      // Add image
+      pdf.addImage(img, "JPEG", imgX, currentY, imgWidth, imgHeight);
+      currentY += imgHeight + 15;
+
+      // Add "Recognized Text" label
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Recognized Text:", margin, currentY);
+      currentY += 8;
+
+      // Add processed text
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "normal");
+      
+      const textLines = pdf.splitTextToSize(processedText || "No text recognized", contentWidth);
+      
+      // Check if we need to add pages for long text
+      const lineHeight = 6;
+      for (let i = 0; i < textLines.length; i++) {
+        if (currentY + lineHeight > pageHeight - margin) {
+          pdf.addPage();
+          currentY = margin;
+        }
+        pdf.text(textLines[i], margin, currentY);
+        currentY += lineHeight;
+      }
+
+      // Save the PDF
+      pdf.save("scribescan-document.pdf");
+      toast.success("PDF downloaded successfully!");
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast.error("Failed to generate PDF");
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const handleShare = async () => {
@@ -62,9 +138,14 @@ const ComparisonView = ({ originalImage, processedText, onReset }: ComparisonVie
           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           {copied ? "Copied!" : "Copy Text"}
         </Button>
-        <Button onClick={handleDownload} variant="secondary" className="gap-2">
+        <Button 
+          onClick={handleDownload} 
+          variant="secondary" 
+          className="gap-2"
+          disabled={isDownloading}
+        >
           <Download className="w-4 h-4" />
-          Download
+          {isDownloading ? "Generating..." : "Download PDF"}
         </Button>
         <Button onClick={handleShare} variant="secondary" className="gap-2">
           <Share2 className="w-4 h-4" />
