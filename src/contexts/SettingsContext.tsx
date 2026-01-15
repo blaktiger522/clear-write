@@ -1,21 +1,16 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 export interface Settings {
-  language: string;
   autoSaveHistory: boolean;
-  compactView: boolean;
 }
 
 interface SettingsContextType {
   settings: Settings;
   updateSettings: (updates: Partial<Settings>) => void;
-  resetSettings: () => void;
 }
 
 const defaultSettings: Settings = {
-  language: "eng",
   autoSaveHistory: true,
-  compactView: false,
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -47,12 +42,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setSettings((prev) => ({ ...prev, ...updates }));
   };
 
-  const resetSettings = () => {
-    setSettings(defaultSettings);
-  };
-
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, resetSettings }}>
+    <SettingsContext.Provider value={{ settings, updateSettings }}>
       {children}
     </SettingsContext.Provider>
   );

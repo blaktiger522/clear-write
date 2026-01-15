@@ -28,7 +28,7 @@ const Index = () => {
     setUploadedImage(preview);
     setAppState("processing");
 
-    const result = await processImage(file, settings.language);
+    const result = await processImage(file);
     
     if (result) {
       setProcessedText(result.text);
@@ -59,7 +59,7 @@ const Index = () => {
       });
       handleReset();
     }
-  }, [processImage, settings.language, settings.autoSaveHistory, addToHistory]);
+  }, [processImage, settings.autoSaveHistory, addToHistory]);
 
   const handleReset = useCallback(() => {
     setAppState("upload");
