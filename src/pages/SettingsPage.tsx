@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Settings, Globe, HardDrive, Info, FileText, Shield } from "lucide-react";
+import { Settings, Globe, HardDrive, Info, FileText, Shield, MessageCircle, Mail } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -140,11 +140,55 @@ const SettingsPage = () => {
             </div>
           </motion.div>
 
-          {/* About Us */}
+          {/* Feedback & Support */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
+            className="bg-card rounded-2xl shadow-soft p-6"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
+                <MessageCircle className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-display font-semibold">Feedback & Support</h2>
+                <p className="text-sm text-muted-foreground">
+                  We'd love to hear from you
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <a 
+                href="mailto:support@scribescan.com" 
+                className="flex items-center gap-3 bg-accent/50 rounded-lg px-4 py-3 hover:bg-accent transition-colors group"
+              >
+                <Mail className="w-5 h-5 text-primary" />
+                <div className="flex-1">
+                  <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                    Email Support
+                  </span>
+                  <p className="text-xs text-muted-foreground">
+                    support@scribescan.com
+                  </p>
+                </div>
+              </a>
+              
+              <div className="bg-accent/50 rounded-lg px-4 py-3">
+                <p className="text-sm text-muted-foreground">
+                  Have a feature request or found a bug? We appreciate your feedback to help 
+                  improve ScribeScan. Response time is typically within 24-48 hours.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* About Us */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
             className="bg-accent/50 rounded-2xl p-6"
           >
             <div className="flex items-start gap-3">
