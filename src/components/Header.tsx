@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { FileText, History, Settings } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Header = () => {
   const location = useLocation();
@@ -15,40 +16,57 @@ const Header = () => {
   return (
     <>
       {/* Desktop Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-50 bg-background/60 backdrop-blur-xl border-b border-border/50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-soft">
+            <Link to="/" className="flex items-center gap-3 group">
+              <motion.div 
+                className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20"
+                whileHover={{ scale: 1.05, rotate: -3 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
                 <FileText className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="font-display font-bold text-lg">ScribeScan</h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">
+              </motion.div>
+              <div className="flex flex-col">
+                <span className="font-display font-bold text-lg tracking-tight group-hover:text-primary transition-colors">
+                  ScribeScan
+                </span>
+                <span className="text-[10px] text-muted-foreground hidden sm:block leading-none">
                   Handwriting Recognition
-                </p>
+                </span>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1 bg-muted/50 rounded-full p-1">
               {navLinks.map((link) => {
                 const Icon = link.icon;
+                const active = isActive(link.to);
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`
-                      flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
-                      ${isActive(link.to)
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      }
-                    `}
+                    className="relative"
                   >
-                    <Icon className="w-4 h-4" />
-                    {link.label}
+                    {active && (
+                      <motion.div
+                        layoutId="activeTab"
+                        className="absolute inset-0 bg-background rounded-full shadow-sm"
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    )}
+                    <span className={`
+                      relative z-10 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors
+                      ${active
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                      }
+                    `}>
+                      <Icon className="w-4 h-4" />
+                      {link.label}
+                    </span>
                   </Link>
                 );
               })}
@@ -58,8 +76,8 @@ const Header = () => {
       </header>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border safe-area-bottom">
-        <div className="flex items-center justify-around h-16 px-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border/50 safe-area-bottom">
+        <div className="flex items-center justify-around h-16 px-4">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.to);
@@ -67,21 +85,22 @@ const Header = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`
-                  flex flex-col items-center justify-center gap-1 flex-1 py-2 rounded-xl transition-all
-                  ${active
-                    ? "text-primary"
-                    : "text-muted-foreground active:text-foreground"
-                  }
-                `}
+                className="relative flex flex-col items-center justify-center gap-1 flex-1 py-2"
               >
-                <div className={`
-                  p-2 rounded-xl transition-all
-                  ${active ? "bg-primary/10" : ""}
-                `}>
-                  <Icon className={`w-5 h-5 ${active ? "scale-110" : ""} transition-transform`} />
-                </div>
-                <span className={`text-xs font-medium ${active ? "text-primary" : ""}`}>
+                {active && (
+                  <motion.div
+                    layoutId="activeMobileTab"
+                    className="absolute inset-x-2 top-1 bottom-1 bg-primary/10 rounded-xl"
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                )}
+                <motion.div 
+                  className="relative z-10"
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Icon className={`w-5 h-5 transition-colors ${active ? "text-primary" : "text-muted-foreground"}`} />
+                </motion.div>
+                <span className={`relative z-10 text-xs font-medium transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}>
                   {link.label}
                 </span>
               </Link>
