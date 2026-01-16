@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Settings, Globe, HardDrive, Info } from "lucide-react";
+import { Settings, Globe, HardDrive, Info, FileText, Shield } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -74,17 +74,83 @@ const SettingsPage = () => {
             </div>
           </motion.div>
 
-          {/* About */}
+          {/* Terms of Use */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+            className="bg-card rounded-2xl shadow-soft p-6"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
+                <FileText className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-display font-semibold">Terms of Use</h2>
+                <p className="text-sm text-muted-foreground">
+                  Our terms and conditions
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-accent/50 rounded-lg px-4 py-3 text-sm text-muted-foreground space-y-2">
+              <p>
+                By using ScribeScan, you agree to use the service for lawful purposes only. 
+                You retain ownership of all content you upload and process through our service.
+              </p>
+              <p>
+                ScribeScan is provided "as is" without warranties. We are not liable for any 
+                errors in text recognition or data loss. Use of the service is at your own risk.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Privacy Policy */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-card rounded-2xl shadow-soft p-6"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-display font-semibold">Privacy Policy</h2>
+                <p className="text-sm text-muted-foreground">
+                  How we handle your data
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-accent/50 rounded-lg px-4 py-3 text-sm text-muted-foreground space-y-2">
+              <p>
+                <strong className="text-foreground">Data Processing:</strong> All document processing 
+                happens locally in your browser. Your images and text are never uploaded to our servers.
+              </p>
+              <p>
+                <strong className="text-foreground">Storage:</strong> Processed documents are stored 
+                only on your device using local browser storage. We have no access to your data.
+              </p>
+              <p>
+                <strong className="text-foreground">No Tracking:</strong> We do not collect personal 
+                information, use cookies for tracking, or share any data with third parties.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* About Us */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
             className="bg-accent/50 rounded-2xl p-6"
           >
             <div className="flex items-start gap-3">
               <Info className="w-5 h-5 text-primary mt-0.5" />
               <div>
-                <h3 className="font-medium text-foreground mb-1">About ScribeScan</h3>
+                <h3 className="font-medium text-foreground mb-1">About Us</h3>
                 <p className="text-sm text-muted-foreground">
                   ScribeScan uses advanced AI-powered OCR technology to recognize and convert 
                   handwritten text into digital format. Your documents are processed locally 
