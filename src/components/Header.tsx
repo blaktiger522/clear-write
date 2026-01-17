@@ -58,7 +58,7 @@ const Header = () => {
                       <motion.div
                         layoutId="activeTab"
                         className="absolute inset-0 bg-background rounded-full shadow-sm border border-border/50"
-                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        transition={{ type: "tween", duration: 0.15, ease: "easeOut" }}
                       />
                     )}
                     <span className={`
@@ -95,7 +95,7 @@ const Header = () => {
                   <motion.div
                     layoutId="activeMobileTab"
                     className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full"
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    transition={{ type: "tween", duration: 0.15, ease: "easeOut" }}
                   />
                 )}
                 <motion.div 
