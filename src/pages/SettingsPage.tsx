@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Settings, Globe, HardDrive, Info, FileText, Shield, MessageCircle, Mail } from "lucide-react";
+import { Settings, Globe, HardDrive, Info, FileText, Shield, MessageCircle, Mail, Heart, Coffee } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -181,6 +181,45 @@ const SettingsPage = () => {
                   improve ScribeScan. Response time is typically within 24-48 hours.
                 </p>
               </div>
+            </div>
+          </motion.div>
+
+          {/* Support ScribeScan */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="bg-card rounded-2xl shadow-soft p-6"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
+                <Heart className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-display font-semibold">Support ScribeScan</h2>
+                <p className="text-sm text-muted-foreground">
+                  Help keep this project alive
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="bg-accent/50 rounded-lg px-4 py-3">
+                <p className="text-sm text-muted-foreground">
+                  If you find ScribeScan useful, consider supporting its development. 
+                  Your contribution helps cover hosting costs and enables new features!
+                </p>
+              </div>
+              
+              <a
+                href="https://buymeacoffee.com/YOUR_USERNAME"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-[#FFDD00] hover:bg-[#FFDD00]/90 text-[#000000] font-medium rounded-lg px-4 py-3 transition-colors"
+              >
+                <Coffee className="w-5 h-5" />
+                <span>Buy Me a Coffee</span>
+              </a>
             </div>
           </motion.div>
 
