@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <p>© {currentYear} ScribeScan</p>
           <a
-            href="https://buymeacoffee.com/YOUR_USERNAME"
+            href="https://buymeacoffee.com/ClarifAI"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"

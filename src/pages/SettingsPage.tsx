@@ -212,7 +212,7 @@ const SettingsPage = () => {
               </div>
               
               <a
-                href="https://buymeacoffee.com/YOUR_USERNAME"
+                href="https://buymeacoffee.com/ClarifAI"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 bg-[#FFDD00] hover:bg-[#FFDD00]/90 text-[#000000] font-medium rounded-lg px-4 py-3 transition-colors"
