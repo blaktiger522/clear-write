@@ -18,8 +18,9 @@ const Index = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [processedText, setProcessedText] = useState<string>("");
   const [confidence, setConfidence] = useState<number>(0);
+  const [ocrEngine, setOcrEngine] = useState<'nanonets' | 'tesseract' | null>(null);
   
-  const { isProcessing, progress, status, processImage, reset: resetOCR } = useOCR();
+  const { isProcessing, progress, status, engine, processImage, reset: resetOCR } = useOCR();
   const { addToHistory } = useHistory();
 
   const handleImageUpload = useCallback(async (file: File, preview: string) => {
@@ -31,6 +32,7 @@ const Index = () => {
     if (result) {
       setProcessedText(result.text);
       setConfidence(result.confidence);
+      setOcrEngine(result.engine);
       setAppState("result");
       
       // Auto-save to history
@@ -40,9 +42,11 @@ const Index = () => {
         confidence: result.confidence,
       });
       
+      const engineLabel = result.engine === 'nanonets' ? 'Nanonets' : 'Tesseract';
+      
       if (result.text) {
         toast.success("Text recognized successfully!", {
-          description: `Confidence: ${Math.round(result.confidence)}%`,
+          description: `Engine: ${engineLabel} • Confidence: ${Math.round(result.confidence)}%`,
         });
       } else {
         toast.info("No text was found in this image", {
@@ -62,6 +66,7 @@ const Index = () => {
     setUploadedImage(null);
     setProcessedText("");
     setConfidence(0);
+    setOcrEngine(null);
     resetOCR();
   }, [resetOCR]);
 
@@ -97,7 +102,7 @@ const Index = () => {
               exit={{ opacity: 0 }}
               className="container mx-auto px-4 py-16"
             >
-              <ProcessingState progress={progress} status={status} />
+              <ProcessingState progress={progress} status={status} engine={engine} />
               
               {/* Show preview of uploaded image */}
               {uploadedImage && (
@@ -140,6 +145,8 @@ const Index = () => {
                 originalImage={uploadedImage}
                 processedText={processedText}
                 onReset={handleReset}
+                ocrEngine={ocrEngine}
+                confidence={confidence}
               />
             </motion.div>
           )}
