@@ -88,27 +88,37 @@ serve(async (req) => {
     }
 
     const result = await response.json();
-    console.log('Nanonets response received');
+    console.log('Nanonets raw response:', JSON.stringify(result, null, 2));
 
-    // Extract text from Nanonets response
+    // Extract text from Nanonets response - handle multiple response formats
     let extractedText = '';
     let totalConfidence = 0;
     let predictionCount = 0;
 
     if (result.result && result.result.length > 0) {
       const pageResult = result.result[0];
+      console.log('Page result keys:', Object.keys(pageResult));
       
-      // Check for raw_text first (full page OCR)
+      // Method 1: Check for raw_text in page_data (full page OCR models)
       if (pageResult.page_data && pageResult.page_data.raw_text) {
         extractedText = pageResult.page_data.raw_text;
-        totalConfidence = 85; // Default confidence for raw text
+        totalConfidence = 85;
         predictionCount = 1;
+        console.log('Found raw_text in page_data');
       } 
-      // Then check for prediction array
+      // Method 2: Check for raw_text directly on pageResult
+      else if (pageResult.raw_text) {
+        extractedText = pageResult.raw_text;
+        totalConfidence = 85;
+        predictionCount = 1;
+        console.log('Found raw_text directly');
+      }
+      // Method 3: Check for prediction array with ocr_text
       else if (pageResult.prediction && pageResult.prediction.length > 0) {
         const textParts: string[] = [];
         
         for (const pred of pageResult.prediction) {
+          console.log('Prediction item:', JSON.stringify(pred));
           if (pred.ocr_text) {
             textParts.push(pred.ocr_text);
             if (pred.score) {
@@ -116,10 +126,37 @@ serve(async (req) => {
               predictionCount++;
             }
           }
+          // Also check for 'text' field
+          else if (pred.text) {
+            textParts.push(pred.text);
+            if (pred.confidence) {
+              totalConfidence += pred.confidence * 100;
+              predictionCount++;
+            }
+          }
         }
         
         extractedText = textParts.join('\n');
+        console.log('Extracted from predictions:', extractedText.substring(0, 100));
       }
+      // Method 4: Check for words array (some OCR models)
+      else if (pageResult.words && pageResult.words.length > 0) {
+        const textParts: string[] = [];
+        for (const word of pageResult.words) {
+          if (word.text) {
+            textParts.push(word.text);
+          }
+        }
+        extractedText = textParts.join(' ');
+        totalConfidence = 85;
+        predictionCount = 1;
+        console.log('Extracted from words array');
+      }
+    }
+    
+    // If still no text, log the full structure for debugging
+    if (!extractedText) {
+      console.log('No text extracted. Full result structure:', JSON.stringify(result));
     }
 
     const avgConfidence = predictionCount > 0 
