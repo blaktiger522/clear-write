@@ -4,12 +4,15 @@ import { Loader2, Brain, FileText, CheckCircle } from "lucide-react";
 interface ProcessingStateProps {
   progress: number;
   status: string;
+  engine?: 'nanonets' | 'tesseract' | null;
 }
 
-const ProcessingState = ({ progress, status }: ProcessingStateProps) => {
+const ProcessingState = ({ progress, status, engine }: ProcessingStateProps) => {
+  const engineLabel = engine === 'nanonets' ? 'Nanonets AI' : engine === 'tesseract' ? 'Tesseract' : 'OCR';
+  
   const steps = [
     { icon: FileText, label: "Analyzing image", threshold: 0 },
-    { icon: Brain, label: "Recognizing text", threshold: 30 },
+    { icon: Brain, label: `${engineLabel}`, threshold: 30 },
     { icon: CheckCircle, label: "Finalizing", threshold: 80 },
   ];
 
