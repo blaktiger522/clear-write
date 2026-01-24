@@ -1,30 +1,19 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Download, Share2, Copy, Check, RefreshCw, Image, FileText, Cpu, Zap } from "lucide-react";
+import { Download, Share2, Copy, Check, RefreshCw, Image, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
-import { Badge } from "@/components/ui/badge";
 
 interface ComparisonViewProps {
   originalImage: string;
   processedText: string;
   onReset: () => void;
-  ocrEngine?: 'nanonets' | 'tesseract' | null;
-  confidence?: number;
 }
 
-const ComparisonView = ({ 
-  originalImage, 
-  processedText, 
-  onReset,
-  ocrEngine,
-  confidence 
-}: ComparisonViewProps) => {
+const ComparisonView = ({ originalImage, processedText, onReset }: ComparisonViewProps) => {
   const [copied, setCopied] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  
-  const engineLabel = ocrEngine === 'nanonets' ? 'Nanonets AI' : ocrEngine === 'tesseract' ? 'Tesseract' : null;
 
   const handleCopy = async () => {
     try {
@@ -197,28 +186,9 @@ const ComparisonView = ({
           transition={{ delay: 0.2 }}
           className="bg-card rounded-2xl shadow-card overflow-hidden flex flex-col"
         >
-          <div className="flex items-center justify-between px-4 py-3 bg-secondary/50 border-b border-border">
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-primary" />
-              <span className="font-medium text-sm">Recognized Text</span>
-            </div>
-            {engineLabel && (
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="gap-1 text-xs">
-                  {ocrEngine === 'nanonets' ? (
-                    <Zap className="w-3 h-3" />
-                  ) : (
-                    <Cpu className="w-3 h-3" />
-                  )}
-                  {engineLabel}
-                </Badge>
-                {confidence !== undefined && confidence > 0 && (
-                  <Badge variant="outline" className="text-xs">
-                    {Math.round(confidence)}% confidence
-                  </Badge>
-                )}
-              </div>
-            )}
+          <div className="flex items-center gap-2 px-4 py-3 bg-secondary/50 border-b border-border">
+            <FileText className="w-4 h-4 text-primary" />
+            <span className="font-medium text-sm">Recognized Text</span>
           </div>
           <div className="p-4 flex-1 overflow-auto">
             {processedText ? (
