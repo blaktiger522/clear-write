@@ -147,9 +147,9 @@ const UploadArea = ({ onImageUpload, isProcessing }: UploadAreaProps) => {
             onClick={handleUploadClick}
             disabled={isProcessing}
             size="lg"
-            className="flex-1 h-24 sm:h-14 text-xl sm:text-base gap-3 rounded-xl"
+            className="flex-1 h-28 sm:h-16 text-2xl sm:text-base gap-3 rounded-xl"
           >
-            <Upload className="w-8 h-8 sm:w-5 sm:h-5" />
+            <Upload className="w-9 h-9 sm:w-5 sm:h-5" />
             Upload Files
           </Button>
           
@@ -158,9 +158,9 @@ const UploadArea = ({ onImageUpload, isProcessing }: UploadAreaProps) => {
             disabled={isProcessing}
             variant="secondary"
             size="lg"
-            className="flex-1 h-24 sm:h-14 text-xl sm:text-base gap-3 rounded-xl"
+            className="flex-1 h-28 sm:h-16 text-2xl sm:text-base gap-3 rounded-xl"
           >
-            <Camera className="w-8 h-8 sm:w-5 sm:h-5" />
+            <Camera className="w-9 h-9 sm:w-5 sm:h-5" />
             Capture Photo
           </Button>
         </div>
