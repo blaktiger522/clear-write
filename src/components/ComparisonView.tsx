@@ -33,74 +33,162 @@ const ComparisonView = ({ originalImage, processedText, onReset }: ComparisonVie
       const pdf = new jsPDF();
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 20;
+      const margin = 15;
       const contentWidth = pageWidth - margin * 2;
 
-      // Add title
-      pdf.setFontSize(18);
+      // --- Header bar ---
+      pdf.setFillColor(37, 99, 235); // primary blue
+      pdf.rect(0, 0, pageWidth, 18, "F");
+      pdf.setFontSize(14);
       pdf.setFont("helvetica", "bold");
-      pdf.text("ScribeScan - Recognized Document", margin, margin);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text("ScribeScan — Recognized Document", margin, 12);
 
-      // Add original image
+      // Reset text color
+      pdf.setTextColor(50, 50, 50);
+
+      let currentY = 28;
+
+      // --- Date line ---
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(130, 130, 130);
+      const dateStr = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      pdf.text(`Generated: ${dateStr}`, margin, currentY);
+      currentY += 8;
+
+      // --- Divider line ---
+      pdf.setDrawColor(220, 220, 220);
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, currentY, pageWidth - margin, currentY);
+      currentY += 8;
+
+      // --- Original Image Section ---
+      pdf.setTextColor(37, 99, 235);
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("ORIGINAL IMAGE", margin, currentY);
+      currentY += 6;
+
+      // Load image
       const img = new window.Image();
       img.crossOrigin = "anonymous";
-      
       await new Promise<void>((resolve, reject) => {
         img.onload = () => resolve();
         img.onerror = () => reject(new Error("Failed to load image"));
         img.src = originalImage;
       });
 
-      // Calculate image dimensions to fit width while maintaining aspect ratio
+      // Calculate image dimensions
       const imgAspectRatio = img.width / img.height;
-      let imgWidth = contentWidth;
+      const maxImgWidth = contentWidth - 10;
+      let imgWidth = maxImgWidth;
       let imgHeight = imgWidth / imgAspectRatio;
-      
-      // Limit image height to leave room for text
-      const maxImgHeight = (pageHeight - margin * 2) * 0.4;
+
+      const maxImgHeight = (pageHeight - margin * 2) * 0.38;
       if (imgHeight > maxImgHeight) {
         imgHeight = maxImgHeight;
         imgWidth = imgHeight * imgAspectRatio;
       }
 
-      // Center the image
-      const imgX = margin + (contentWidth - imgWidth) / 2;
-      let currentY = margin + 15;
+      // Draw framed box for image
+      const imgBoxX = margin;
+      const imgBoxY = currentY;
+      const imgBoxW = contentWidth;
+      const imgBoxH = imgHeight + 10;
 
-      // Add "Original Image" label
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Original Image:", margin, currentY);
-      currentY += 5;
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.3);
+      pdf.setFillColor(248, 249, 250);
+      pdf.roundedRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 3, 3, "FD");
 
-      // Add image
-      pdf.addImage(img, "JPEG", imgX, currentY, imgWidth, imgHeight);
-      currentY += imgHeight + 15;
+      // Center image inside box
+      const imgX = imgBoxX + (imgBoxW - imgWidth) / 2;
+      const imgY = imgBoxY + 5;
+      pdf.addImage(img, "JPEG", imgX, imgY, imgWidth, imgHeight);
+      currentY = imgBoxY + imgBoxH + 10;
 
-      // Add "Recognized Text" label
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Recognized Text:", margin, currentY);
+      // --- Divider line ---
+      pdf.setDrawColor(220, 220, 220);
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, currentY, pageWidth - margin, currentY);
       currentY += 8;
 
-      // Add processed text
+      // --- Recognized Text Section ---
+      pdf.setTextColor(37, 99, 235);
       pdf.setFontSize(11);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("RECOGNIZED TEXT", margin, currentY);
+      currentY += 6;
+
+      // Prepare text lines
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
-      
-      const textLines = pdf.splitTextToSize(processedText || "No text recognized", contentWidth);
-      
-      // Check if we need to add pages for long text
-      const lineHeight = 6;
+      pdf.setTextColor(50, 50, 50);
+      const textLines = pdf.splitTextToSize(processedText || "No text recognized", contentWidth - 14);
+      const lineHeight = 5.5;
+      const textBlockHeight = Math.min(textLines.length * lineHeight + 10, pageHeight - currentY - margin - 10);
+
+      // Draw framed box for text
+      const textBoxX = margin;
+      const textBoxY = currentY;
+      const textBoxW = contentWidth;
+      const textBoxH = Math.max(textBlockHeight, 30);
+
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.3);
+      pdf.setFillColor(255, 255, 255);
+      pdf.roundedRect(textBoxX, textBoxY, textBoxW, textBoxH, 3, 3, "FD");
+
+      // Add text inside box
+      let textY = textBoxY + 7;
       for (let i = 0; i < textLines.length; i++) {
-        if (currentY + lineHeight > pageHeight - margin) {
+        if (textY + lineHeight > pageHeight - margin) {
+          // Footer on current page
+          pdf.setDrawColor(220, 220, 220);
+          pdf.setLineWidth(0.3);
+          pdf.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+          pdf.setFontSize(8);
+          pdf.setTextColor(160, 160, 160);
+          pdf.text("ScribeScan • Handwriting Recognition", margin, pageHeight - 7);
+          pdf.text(`Page ${pdf.getNumberOfPages()}`, pageWidth - margin - 15, pageHeight - 7);
+
           pdf.addPage();
-          currentY = margin;
+          textY = margin + 5;
+
+          // Continuation header
+          pdf.setFillColor(245, 247, 250);
+          pdf.rect(0, 0, pageWidth, 12, "F");
+          pdf.setFontSize(9);
+          pdf.setTextColor(130, 130, 130);
+          pdf.setFont("helvetica", "italic");
+          pdf.text("Recognized Text (continued)", margin, 8);
+          textY = 20;
+
+          pdf.setFontSize(10);
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(50, 50, 50);
         }
-        pdf.text(textLines[i], margin, currentY);
-        currentY += lineHeight;
+        pdf.text(textLines[i], textBoxX + 7, textY);
+        textY += lineHeight;
       }
 
-      // Save the PDF
+      // --- Footer ---
+      pdf.setDrawColor(220, 220, 220);
+      pdf.setLineWidth(0.3);
+      pdf.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+      pdf.setFontSize(8);
+      pdf.setTextColor(160, 160, 160);
+      pdf.setFont("helvetica", "normal");
+      pdf.text("ScribeScan • Handwriting Recognition", margin, pageHeight - 7);
+      pdf.text(`Page ${pdf.getNumberOfPages()}`, pageWidth - margin - 15, pageHeight - 7);
+
       pdf.save("scribescan-document.pdf");
       toast.success("PDF downloaded successfully!");
     } catch (error) {
