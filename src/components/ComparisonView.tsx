@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Download, Share2, Copy, Check, RefreshCw, Image, FileText } from "lucide-react";
+import { Download, Copy, Check, RefreshCw, Image, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
@@ -111,20 +111,6 @@ const ComparisonView = ({ originalImage, processedText, onReset }: ComparisonVie
     }
   };
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Recognized Handwriting",
-          text: processedText,
-        });
-      } catch {
-        // User cancelled sharing
-      }
-    } else {
-      handleCopy();
-    }
-  };
 
   return (
     <motion.div
@@ -146,10 +132,6 @@ const ComparisonView = ({ originalImage, processedText, onReset }: ComparisonVie
         >
           <Download className="w-4 h-4" />
           {isDownloading ? "Generating..." : "Download PDF"}
-        </Button>
-        <Button onClick={handleShare} variant="secondary" className="gap-2">
-          <Share2 className="w-4 h-4" />
-          Share
         </Button>
         <Button onClick={onReset} variant="outline" className="gap-2">
           <RefreshCw className="w-4 h-4" />
