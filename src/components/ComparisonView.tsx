@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Download, Copy, Check, RefreshCw, Image, FileText } from "lucide-react";
+import { Download, Copy, Check, RefreshCw, Image, FileText, Cpu, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
+import type { OCREngine } from "@/hooks/useOCR";
 
 interface ComparisonViewProps {
   originalImage: string;
   processedText: string;
+  confidence: number;
+  engine: OCREngine;
   onReset: () => void;
 }
 
-const ComparisonView = ({ originalImage, processedText, onReset }: ComparisonViewProps) => {
+const ComparisonView = ({ originalImage, processedText, confidence, engine, onReset }: ComparisonViewProps) => {
   const [copied, setCopied] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -226,6 +229,28 @@ const ComparisonView = ({ originalImage, processedText, onReset }: ComparisonVie
           New Image
         </Button>
       </div>
+
+      {/* Engine & confidence badge */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-center gap-3 mb-6"
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent border border-border text-sm">
+          {engine === "nanonets" ? (
+            <Sparkles className="w-4 h-4 text-primary" />
+          ) : (
+            <Cpu className="w-4 h-4 text-muted-foreground" />
+          )}
+          <span className="font-medium text-foreground">
+            {engine === "nanonets" ? "Nanonets AI" : "Tesseract (Fallback)"}
+          </span>
+        </div>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent border border-border text-sm">
+          <span className="text-muted-foreground">Confidence:</span>
+          <span className="font-semibold text-foreground">{Math.round(confidence)}%</span>
+        </div>
+      </motion.div>
 
       {/* Comparison grid */}
       <div className="grid md:grid-cols-2 gap-6">

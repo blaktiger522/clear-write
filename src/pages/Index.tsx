@@ -7,7 +7,7 @@ import UploadArea from "@/components/UploadArea";
 import HowItWorks from "@/components/HowItWorks";
 import ProcessingState from "@/components/ProcessingState";
 import ComparisonView from "@/components/ComparisonView";
-import { useOCR } from "@/hooks/useOCR";
+import { useOCR, type OCREngine } from "@/hooks/useOCR";
 import { useHistory } from "@/contexts/HistoryContext";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ const Index = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [processedText, setProcessedText] = useState<string>("");
   const [confidence, setConfidence] = useState<number>(0);
+  const [ocrEngine, setOcrEngine] = useState<OCREngine>("nanonets");
   
   const { isProcessing, progress, status, processImage, reset: resetOCR } = useOCR();
   const { addToHistory } = useHistory();
@@ -31,6 +32,7 @@ const Index = () => {
     if (result) {
       setProcessedText(result.text);
       setConfidence(result.confidence);
+      setOcrEngine(result.engine);
       setAppState("result");
       
       // Auto-save to history
@@ -42,7 +44,7 @@ const Index = () => {
       
       if (result.text) {
         toast.success("Text recognized successfully!", {
-          description: `Confidence: ${Math.round(result.confidence)}%`,
+          description: `Engine: ${result.engine === "nanonets" ? "Nanonets" : "Tesseract"} • Confidence: ${Math.round(result.confidence)}%`,
         });
       } else {
         toast.info("No text was found in this image", {
@@ -62,6 +64,7 @@ const Index = () => {
     setUploadedImage(null);
     setProcessedText("");
     setConfidence(0);
+    setOcrEngine("nanonets");
     resetOCR();
   }, [resetOCR]);
 
@@ -139,6 +142,8 @@ const Index = () => {
               <ComparisonView
                 originalImage={uploadedImage}
                 processedText={processedText}
+                confidence={confidence}
+                engine={ocrEngine}
                 onReset={handleReset}
               />
             </motion.div>
