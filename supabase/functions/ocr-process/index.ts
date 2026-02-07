@@ -12,11 +12,10 @@ serve(async (req) => {
 
   try {
     const NANONETS_API_KEY = Deno.env.get('NANONETS_API_KEY');
-    const NANONETS_MODEL_ID = Deno.env.get('NANONETS_MODEL_ID');
 
-    if (!NANONETS_API_KEY || !NANONETS_MODEL_ID) {
+    if (!NANONETS_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'Nanonets API credentials not configured' }),
+        JSON.stringify({ error: 'Nanonets API key not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -31,16 +30,15 @@ serve(async (req) => {
       );
     }
 
-    // Send to Nanonets OCR API
+    // Build request for Nanonets Extraction API
     const nanonetsFormData = new FormData();
     nanonetsFormData.append('file', imageFile, imageFile.name || 'image.jpg');
+    nanonetsFormData.append('output_format', 'markdown');
 
-    const nanonetsUrl = `https://app.nanonets.com/api/v2/OCR/Model/${NANONETS_MODEL_ID}/LabelFile/`;
-
-    const response = await fetch(nanonetsUrl, {
+    const response = await fetch('https://extraction-api.nanonets.com/api/v1/extract/sync', {
       method: 'POST',
       headers: {
-        'Authorization': 'Basic ' + btoa(NANONETS_API_KEY + ':'),
+        'Authorization': `Bearer ${NANONETS_API_KEY}`,
       },
       body: nanonetsFormData,
     });
@@ -56,39 +54,38 @@ serve(async (req) => {
 
     const data = await response.json();
 
-    // Extract text from Nanonets response
+    // Extract text from the response
     let extractedText = '';
-    let confidence = 0;
-    let predictionCount = 0;
+    let confidence = 90; // Default high confidence for Nanonets
 
-    if (data.result && Array.isArray(data.result)) {
-      for (const page of data.result) {
-        if (page.prediction && Array.isArray(page.prediction)) {
-          for (const prediction of page.prediction) {
-            if (prediction.ocr_text) {
-              extractedText += prediction.ocr_text + '\n';
-            }
-            if (typeof prediction.score === 'number') {
-              confidence += prediction.score;
-              predictionCount++;
-            }
-          }
-        }
-        // Also check for page-level raw_text
-        if (page.page_data && page.page_data.raw_text) {
-          if (!extractedText.trim()) {
-            extractedText = page.page_data.raw_text;
-          }
-        }
+    if (typeof data === 'string') {
+      extractedText = data;
+    } else if (data.result) {
+      // Handle various response formats
+      if (typeof data.result === 'string') {
+        extractedText = data.result;
+      } else if (Array.isArray(data.result)) {
+        extractedText = data.result.map((r: any) => r.text || r.raw_text || r.ocr_text || '').join('\n');
       }
+    } else if (data.text) {
+      extractedText = data.text;
+    } else if (data.raw_text) {
+      extractedText = data.raw_text;
+    } else if (data.markdown) {
+      extractedText = data.markdown;
+    } else {
+      // Try to extract any text content from the response
+      extractedText = JSON.stringify(data);
     }
 
-    const avgConfidence = predictionCount > 0 ? (confidence / predictionCount) * 100 : 85;
+    if (data.confidence) {
+      confidence = typeof data.confidence === 'number' ? data.confidence * 100 : parseFloat(data.confidence);
+    }
 
     return new Response(
       JSON.stringify({
         text: extractedText.trim(),
-        confidence: Math.round(avgConfidence * 100) / 100,
+        confidence: Math.round(confidence * 100) / 100,
         engine: 'nanonets',
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
