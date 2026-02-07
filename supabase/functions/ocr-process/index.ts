@@ -52,29 +52,60 @@ serve(async (req) => {
       );
     }
 
-    const data = await response.json();
+    const responseText = await response.text();
+    console.log('Nanonets raw response:', responseText.substring(0, 2000));
 
-    // Extract text from the response
+    let data: any;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      // Response is plain text (e.g., markdown)
+      return new Response(
+        JSON.stringify({
+          text: responseText.trim(),
+          confidence: 95,
+          engine: 'nanonets',
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Nanonets parsed response keys:', Object.keys(data));
+
+    // Extract text from the response - check all known fields
     let extractedText = '';
-    let confidence = 90; // Default high confidence for Nanonets
+    let confidence = 90;
 
-    if (typeof data === 'string') {
-      extractedText = data;
-    } else if (data.result) {
-      // Handle various response formats
-      if (typeof data.result === 'string') {
-        extractedText = data.result;
-      } else if (Array.isArray(data.result)) {
-        extractedText = data.result.map((r: any) => r.text || r.raw_text || r.ocr_text || '').join('\n');
-      }
-    } else if (data.text) {
-      extractedText = data.text;
+    if (data.markdown) {
+      extractedText = data.markdown;
     } else if (data.raw_text) {
       extractedText = data.raw_text;
-    } else if (data.markdown) {
-      extractedText = data.markdown;
-    } else {
-      // Try to extract any text content from the response
+    } else if (data.text) {
+      extractedText = data.text;
+    } else if (typeof data.result === 'string') {
+      extractedText = data.result;
+    } else if (Array.isArray(data.result)) {
+      extractedText = data.result.map((r: any) => {
+        console.log('Result item keys:', Object.keys(r));
+        return r.raw_text || r.text || r.ocr_text || r.page_data || '';
+      }).join('\n');
+    } else if (data.results && Array.isArray(data.results)) {
+      extractedText = data.results.map((r: any) => {
+        console.log('Results item keys:', Object.keys(r));
+        return r.raw_text || r.text || r.ocr_text || r.page_data || '';
+      }).join('\n');
+    } else if (data.data) {
+      // Some APIs nest under 'data'
+      if (typeof data.data === 'string') {
+        extractedText = data.data;
+      } else if (Array.isArray(data.data)) {
+        extractedText = data.data.map((d: any) => d.raw_text || d.text || d.ocr_text || '').join('\n');
+      }
+    }
+
+    // If still empty, log full structure and stringify
+    if (!extractedText) {
+      console.log('Full Nanonets response structure:', JSON.stringify(data).substring(0, 3000));
       extractedText = JSON.stringify(data);
     }
 
